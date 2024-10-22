@@ -17,4 +17,4 @@ crun:
 	./client
 
 clean:
-	rm -f client server
+	del /f client.exe server.exe
