@@ -1,19 +1,27 @@
 CC = gcc
-CFLAGS = -Wall -I$(IDIR) -lws2_32 -lwsock32
+CFLAGS = -Werror -Wall -g -I$(IDIR) -lws2_32 -lwsock32
 
-server: scompile srun
-client: ccompile crun
+IDIR = ./include/
+SRCDIR = ./src/
 
-scompile:
-	$(CC) server.c $(CFLAGS) -o server
+SERVER_SOURCE = $(wildcard ${SRCDIR}server/*.c) \
+				$(wildcard ${SRCDIR}other/*.c)
+CLIENT_SOURCE = $(wildcard ${SRCDIR}client/*.c) \
+				$(wildcard ${SRCDIR}other/*.c)
 
-srun:
+server: server_compile server_run
+client: client_compile client_run
+
+server_compile:
+	$(CC) $(SERVER_SOURCE) $(CFLAGS) -o server
+
+server_run:
 	./server
 
-ccompile:
-	$(CC) client.c $(CFLAGS) -o client
+client_compile:
+	$(CC) $(CLIENT_SOURCE) $(CFLAGS) -o client
 
-crun:
+client_run:
 	./client
 
 clean:
