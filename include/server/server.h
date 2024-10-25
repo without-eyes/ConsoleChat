@@ -7,8 +7,12 @@
 typedef struct {
     SOCKET connectionsArray[MAX_USER_COUNT];
     int connectionsCount;
-    int currentConnection;
 } Connections;
+
+typedef struct {
+    Connections* connections;
+    int clientIndex;
+} ThreadData;
 
 int setupListening(SOCKET* listeningSocket, SOCKADDR_IN socketAddress);
 
@@ -16,8 +20,8 @@ int startServerBroadcast(SOCKET listeningSocket, SOCKADDR_IN socketAddress);
 
 int checkNewConnection(SOCKET newConnectionSocket);
 
-_Noreturn void receiveAndBroadcastMessages(Connections* connections);
+_Noreturn void receiveAndBroadcastMessages(ThreadData* threadData);
 
-void broadcastMessage(const Connections* connections, const char* message, int messageSize);
+void broadcastMessage(const ThreadData* threadData, const char* message, const int messageSize);
 
 #endif //CONSOLECHAT_SERVER_H

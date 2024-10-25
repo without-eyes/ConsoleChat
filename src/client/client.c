@@ -5,7 +5,7 @@
 
 int setupConnection(SOCKET* connectionSocket, const SOCKADDR_IN socketAddress) {
     *connectionSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(*connectionSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress)) != 0) {
+    if (connect(*connectionSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress))) {
         puts("Error: Failed connect to server");
         return EXIT_FAILURE;
     } else {
@@ -25,7 +25,7 @@ _Noreturn void receiveAndPrintMessages(const ThreadConnectionSocket* threadConne
 void sendMessage(const SOCKET connectionSocket) {
     char message[MAX_MESSAGE_LENGTH];
     while (1) {
-        fgets(message, sizeof(message), stdin);
+        fgets(message, MAX_MESSAGE_LENGTH, stdin);
         send(connectionSocket, message, sizeof(message), 0);
         sleep(1);
     }

@@ -4,7 +4,7 @@
 
 int setupListening(SOCKET* listeningSocket, SOCKADDR_IN socketAddress) {
     *listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (bind(*listeningSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress)) != 0) {
+    if (bind(*listeningSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress))) {
         puts("Error: Failed to bind");
         return EXIT_FAILURE;
     } else {
@@ -17,21 +17,28 @@ int startServerBroadcast(const SOCKET listeningSocket, const SOCKADDR_IN socketA
     int socketAddressSize = sizeof(socketAddress);
     Connections* connections = (Connections*)malloc(sizeof(Connections));
     connections->connectionsCount = 0;
+    ThreadData* threadData;
 
     for (int i = 0; i < MAX_USER_COUNT; i++) {
         SOCKET newConnectionSocket = accept(listeningSocket, (SOCKADDR*)&socketAddress, &socketAddressSize);
         if (checkNewConnection(newConnectionSocket)) {
+            free(threadData);
             free(connections);
             return EXIT_FAILURE;
         }
 
         connections->connectionsArray[i] = newConnectionSocket;
         connections->connectionsCount++;
-        connections->currentConnection = i;
 
-        CreateThread(0, 0, (LPTHREAD_START_ROUTINE)receiveAndBroadcastMessages, (LPVOID)(connections), 0, 0);
+        // Create a struct to pass the specific client index
+        threadData = malloc(sizeof(ThreadData));
+        threadData->connections = connections;
+        threadData->clientIndex = i;
+
+        CreateThread(0, 0, (LPTHREAD_START_ROUTINE)receiveAndBroadcastMessages, (LPVOID)(threadData), 0, 0);
     }
 
+    free(threadData);
     free(connections);
     return EXIT_SUCCESS;
 }
@@ -46,24 +53,21 @@ int checkNewConnection(SOCKET newConnectionSocket) {
     }
 }
 
-_Noreturn void receiveAndBroadcastMessages(Connections* connections) {
+_Noreturn void receiveAndBroadcastMessages(ThreadData* threadData) {
     char message[MAX_MESSAGE_LENGTH];
     while (1) {
-        recv(connections->connectionsArray[connections->currentConnection], message, sizeof(message), 0);
-        broadcastMessage(connections, message, sizeof(message));
+        recv(threadData->connections->connectionsArray[threadData->clientIndex], message, sizeof(message), 0);
+        broadcastMessage(threadData, message, sizeof(message));
     }
+    free(threadData);
 }
 
-void broadcastMessage(const Connections* connections, const char* message, const int messageSize) {
-    for (int i = 0; i < connections->connectionsCount; i++) {
-        if (i == connections->currentConnection) {
+
+void broadcastMessage(const ThreadData* threadData, const char* message, const int messageSize) {
+    for (int i = 0; i < threadData->connections->connectionsCount; i++) {
+        if (i == threadData->clientIndex) {
             continue;
         }
-        int sendResult = send(connections->connectionsArray[i], message, messageSize, 0);
-        if (sendResult == -1) {
-            perror("Error sending message");
-        } else {
-            printf("Sent message to client %d: %s\n", i, message);
-        }
+        send(threadData->connections->connectionsArray[i], message, messageSize, 0);
     }
 }
