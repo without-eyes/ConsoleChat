@@ -3,6 +3,18 @@
 #include <stdio.h>
 #include <unistd.h>
 
+void enterUsername(char **username) {
+    printf("Enter your username(or skip by pressing 'Enter'): ");
+    char *inputtedUsername = (char*)malloc(MAX_USERNAME_LENGTH * sizeof(char));;
+    fgets(inputtedUsername, MAX_USERNAME_LENGTH, stdin);
+    inputtedUsername[strcspn(inputtedUsername, "\n")] = '\0';
+    if (strcmp(inputtedUsername, "") != 0) {
+        *username = inputtedUsername;
+    } else {
+        free(inputtedUsername);
+    }
+}
+
 int setupConnection(SOCKET* connectionSocket, const SOCKADDR_IN socketAddress) {
     *connectionSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(*connectionSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress))) {
@@ -14,26 +26,40 @@ int setupConnection(SOCKET* connectionSocket, const SOCKADDR_IN socketAddress) {
     }
 }
 
-_Noreturn void receiveAndPrintMessages(const ThreadConnectionSocket* threadConnectionSocket) {
-    char message[MAX_MESSAGE_LENGTH];
+_Noreturn void receiveAndPrintMessages(const ClientConnectionData* clientConnectionData) {
+    char message[MAX_MESSAGE_LENGTH + MAX_USERNAME_LENGTH + 4];
     while (1) {
-        recv(threadConnectionSocket->connectionSocket, message, sizeof(message), 0);
-        printf("%s", message);
+        int bytesReceived = recv(clientConnectionData->connectionSocket, message, sizeof(message) - 1, 0);
+        if (bytesReceived > 0) {
+            message[bytesReceived] = '\0';
+            message[strcspn(message, "\n")] = '\0';
+            printf("\33[2K\r%s\n", message);
+            printf("%s(You) > ", clientConnectionData->username);
+            fflush(stdout);
+        }
     }
 }
 
-void sendMessage(const SOCKET connectionSocket) {
+void sendMessage(const ClientConnectionData* clientConnectionData) {
     char message[MAX_MESSAGE_LENGTH];
+    char formattedMessage[MAX_MESSAGE_LENGTH + MAX_USERNAME_LENGTH + 4];
+
     while (1) {
-        fgets(message, MAX_MESSAGE_LENGTH, stdin);
-        send(connectionSocket, message, sizeof(message), 0);
-        sleep(1);
+        printf("%s(You) > ", clientConnectionData->username);
+        fflush(stdout);
+        if (fgets(message, MAX_MESSAGE_LENGTH, stdin) != NULL) {
+            message[strcspn(message, "\n")] = '\0';
+            snprintf(formattedMessage, sizeof(formattedMessage), "%s > %s", clientConnectionData->username, message);
+            send(clientConnectionData->connectionSocket, formattedMessage, sizeof(formattedMessage), 0);
+        }
     }
 }
 
-void receiveAndSendMessages(const SOCKET connectionSocket) {
-    ThreadConnectionSocket* threadConnectionSocket = (ThreadConnectionSocket*)malloc(sizeof(ThreadConnectionSocket));
-    threadConnectionSocket->connectionSocket = connectionSocket;
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE) receiveAndPrintMessages, (LPVOID)(threadConnectionSocket), 0, 0);
-    sendMessage(connectionSocket);
+void receiveAndSendMessages(const SOCKET connectionSocket, const char* username) {
+    ClientConnectionData* clientConnectionData = (ClientConnectionData*)malloc(sizeof(ClientConnectionData));
+    clientConnectionData->connectionSocket = connectionSocket;
+    clientConnectionData->username = (char*)malloc(strlen(username) + 1);
+    strcpy(clientConnectionData->username, username);
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE) receiveAndPrintMessages, (LPVOID)(clientConnectionData), 0, 0);
+    sendMessage(clientConnectionData);
 }
