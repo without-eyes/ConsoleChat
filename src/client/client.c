@@ -29,12 +29,12 @@ int setupConnection(SOCKET* connectionSocket, const SOCKADDR_IN socketAddress) {
 _Noreturn void receiveAndPrintMessages(const ClientConnectionData* clientConnectionData) {
     char message[MAX_MESSAGE_LENGTH + MAX_USERNAME_LENGTH + 4];
     while (1) {
-        int bytesReceived = recv(clientConnectionData->connectionSocket, message, sizeof(message) - 1, 0);
+        int bytesReceived = recv(clientConnectionData->connectionSocket, message, sizeof(message), 0);
         if (bytesReceived > 0) {
             message[bytesReceived] = '\0';
             message[strcspn(message, "\n")] = '\0';
             printf("\33[2K\r%s\n", message);
-            printf("%s(You) > ", clientConnectionData->username);
+            printf("[%s] ", clientConnectionData->username);
             fflush(stdout);
         }
     }
@@ -45,11 +45,11 @@ void sendMessage(const ClientConnectionData* clientConnectionData) {
     char formattedMessage[MAX_MESSAGE_LENGTH + MAX_USERNAME_LENGTH + 4];
 
     while (1) {
-        printf("%s(You) > ", clientConnectionData->username);
+        printf("[%s] ", clientConnectionData->username);
         fflush(stdout);
-        if (fgets(message, MAX_MESSAGE_LENGTH, stdin) != NULL) {
+        if (gets(message) != NULL) {
             message[strcspn(message, "\n")] = '\0';
-            snprintf(formattedMessage, sizeof(formattedMessage), "%s > %s", clientConnectionData->username, message);
+            snprintf(formattedMessage, sizeof(formattedMessage), "[%s] %s", clientConnectionData->username, message);
             send(clientConnectionData->connectionSocket, formattedMessage, sizeof(formattedMessage), 0);
         }
     }
