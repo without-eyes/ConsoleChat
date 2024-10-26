@@ -5,7 +5,7 @@
 
 void enterUsername(char **username) {
     printf("Enter your username(or skip by pressing 'Enter'): ");
-    char *inputtedUsername = (char*)malloc(MAX_USERNAME_LENGTH * sizeof(char));;
+    char *inputtedUsername = (char*)malloc(MAX_USERNAME_LENGTH * sizeof(char));
     fgets(inputtedUsername, MAX_USERNAME_LENGTH, stdin);
     inputtedUsername[strcspn(inputtedUsername, "\n")] = '\0';
     if (strcmp(inputtedUsername, "") != 0) {

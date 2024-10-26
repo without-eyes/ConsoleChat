@@ -7,8 +7,12 @@ int main(int argc, char* argv[]) {
     char *username = "anonymous";
     enterUsername(&username);
 
+    char *ipAddress;
+    int port;
+    enterIPAddressAndPort(&ipAddress, &port);
+
     SOCKADDR_IN socketAddress;
-    setupSocketAddress(&socketAddress);
+    setupSocketAddress(&socketAddress, ipAddress, port);
 
     SOCKET connectionSocket;
     if (setupConnection(&connectionSocket, socketAddress)) return EXIT_FAILURE;
