@@ -33,7 +33,8 @@ _Noreturn void receiveAndPrintMessages(const ClientConnectionData* clientConnect
         if (bytesReceived > 0) {
             message[bytesReceived] = '\0';
             message[strcspn(message, "\n")] = '\0';
-            printf("\33[2K\r%s\n", message);
+            printf("\r                                                                      ");
+            printf("\r%s\n", message);
             printf("[%s] ", clientConnectionData->username);
             fflush(stdout);
         }
