@@ -1,8 +1,13 @@
 #include "../../include/client/client.h"
 #include "../../include/other/common.h"
+#include "../../include/other/os_directives.h"
+#include <stdlib.h>
 
-int main(int argc, char* argv[]) {
+int main(void) {
+
+#ifdef _WIN32
     if (initializeWinsock()) return EXIT_FAILURE;
+#endif
 
     char *username = "anonymous";
     enterUsername(&username);
@@ -20,8 +25,11 @@ int main(int argc, char* argv[]) {
     receiveAndSendMessages(connectionSocket, username);
 
     free(username);
+
+#ifdef _WIN32
     closesocket(connectionSocket);
     WSACleanup();
+#endif
 
     return EXIT_SUCCESS;
 }
