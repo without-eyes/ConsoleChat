@@ -1,8 +1,11 @@
 #include "../../include/other/common.h"
+#include "../../include/other/os_directives.h"
 #include <stdio.h>
-#include <ws2tcpip.h>
+#include <stdlib.h>
+#include <string.h>
 
-int initializeWinsock() {
+#ifdef _WIN32
+int initializeWinsock(void) {
     struct WSAData wsaData;
     WORD DLLVersion = MAKEWORD(2, 1);
     if (WSAStartup(DLLVersion, &wsaData)) {
@@ -12,6 +15,7 @@ int initializeWinsock() {
     }
     return EXIT_SUCCESS;
 }
+#endif
 
 void enterIPAddressAndPort(char **ipAddress, int* port) {
     *ipAddress = (char*)malloc(16 * sizeof(char));
@@ -23,13 +27,13 @@ void enterIPAddressAndPort(char **ipAddress, int* port) {
     getchar(); // removes additional new line input
 }
 
-bool isValidIpAddress(char *ipAddress) {
+bool isValidIpAddress(const char *ipAddress) {
     struct sockaddr_in sa;
     int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
     return result != 0;
 }
 
-void setupSocketAddress(SOCKADDR_IN* addr, char *ipAddress, int port) {
+void setupSocketAddress(SOCKADDR_IN* addr, const char *ipAddress, const int port) {
     addr->sin_addr.s_addr = inet_addr(ipAddress);
     addr->sin_port = htons(port);
     addr->sin_family = AF_INET;

@@ -1,8 +1,11 @@
 #include "../../include/server/server.h"
 #include "../../include/other/common.h"
+#include <stdlib.h>
 
-int main(int argc, char* argv[]) {
+int main(void) {
+#ifdef _WIN32
     if (initializeWinsock()) return EXIT_FAILURE;
+#endif
 
     char *ipAddress;
     int port;
@@ -16,8 +19,10 @@ int main(int argc, char* argv[]) {
 
     if (startServerBroadcast(listeningSocket, socketAddress)) return EXIT_FAILURE;
 
+#ifdef _WIN32
     closesocket(listeningSocket);
     WSACleanup();
+#endif
 
     return EXIT_SUCCESS;
 }
