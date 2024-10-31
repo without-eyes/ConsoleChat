@@ -65,7 +65,7 @@ void receiveAndSendMessages(const SOCKET connectionSocket, const char* username)
     strcpy(clientConnectionData->username, username);
 
 #ifdef _WIN32
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)receiveAndBroadcastMessages, (LPVOID)(threadData), 0, 0);
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)receiveAndPrintMessages, (LPVOID)(clientConnectionData), 0, 0);
 #elif unix
     pthread_t id;
     pthread_create(&id, NULL, receiveAndPrintMessages, clientConnectionData);

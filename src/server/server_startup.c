@@ -20,7 +20,7 @@ int main(void) {
     if (startServerBroadcast(listeningSocket, socketAddress)) return EXIT_FAILURE;
 
 #ifdef _WIN32
-    closesocket(connectionSocket);
+    closesocket(listeningSocket);
     WSACleanup();
 #endif
 

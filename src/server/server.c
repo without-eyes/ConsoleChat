@@ -15,7 +15,11 @@ int setupListening(SOCKET* listeningSocket, SOCKADDR_IN socketAddress) {
 }
 
 int startServerBroadcast(const SOCKET listeningSocket, const SOCKADDR_IN socketAddress) {
+#ifdef _WIN32
+    int socketAddressSize = sizeof(socketAddress);
+#elif unix
     unsigned int socketAddressSize = sizeof(socketAddress);
+#endif
     Connections* connections = (Connections*)malloc(sizeof(Connections));
     connections->connectionsCount = 0;
     ConnectionsAndClientIndex* threadData = 0;
