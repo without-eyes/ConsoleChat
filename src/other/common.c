@@ -5,6 +5,7 @@
 #include <string.h>
 
 #ifdef _WIN32
+
 int initializeWinsock(void) {
     struct WSAData wsaData;
     WORD DLLVersion = MAKEWORD(2, 1);
@@ -15,10 +16,11 @@ int initializeWinsock(void) {
     }
     return EXIT_SUCCESS;
 }
+
 #endif
 
-void enterIPAddressAndPort(char **ipAddress, int* port) {
-    *ipAddress = (char*)malloc(16 * sizeof(char));
+void enterIPAddressAndPort(char **ipAddress, int *port) {
+    *ipAddress = (char *) malloc(16 * sizeof(char));
     printf("Enter IP address: ");
     fgets(*ipAddress, 16, stdin);
     (*ipAddress)[strcspn(*ipAddress, "\n")] = '\0';
@@ -33,7 +35,7 @@ bool isValidIpAddress(const char *ipAddress) {
     return result != 0;
 }
 
-void setupSocketAddress(SOCKADDR_IN* addr, const char *ipAddress, const int port) {
+void setupSocketAddress(SOCKADDR_IN *addr, const char *ipAddress, const int port) {
     addr->sin_addr.s_addr = inet_addr(ipAddress);
     addr->sin_port = htons(port);
     addr->sin_family = AF_INET;

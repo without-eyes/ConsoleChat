@@ -12,6 +12,6 @@ void enterIPAddressAndPort(char **inputtedIPAddress, int *port);
 
 bool isValidIpAddress(const char *ipAddress);
 
-void setupSocketAddress(SOCKADDR_IN* addr, const char *ipAddress, int port);
+void setupSocketAddress(SOCKADDR_IN *addr, const char *ipAddress, int port);
 
 #endif //CONSOLECHAT_COMMON_H

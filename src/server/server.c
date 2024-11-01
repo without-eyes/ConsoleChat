@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-int setupListening(SOCKET* listeningSocket, SOCKADDR_IN socketAddress) {
+int setupListening(SOCKET *listeningSocket, SOCKADDR_IN socketAddress) {
     *listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (bind(*listeningSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress))) {
+    if (bind(*listeningSocket, (SOCKADDR *) &socketAddress, sizeof(socketAddress))) {
         puts("Error: Failed to bind");
         return EXIT_FAILURE;
     }
@@ -20,12 +20,12 @@ int startServerBroadcast(const SOCKET listeningSocket, const SOCKADDR_IN socketA
 #elif unix
     unsigned int socketAddressSize = sizeof(socketAddress);
 #endif
-    Connections* connections = (Connections*)malloc(sizeof(Connections));
+    Connections *connections = (Connections *) malloc(sizeof(Connections));
     connections->connectionsCount = 0;
-    ConnectionsAndClientIndex* threadData = 0;
+    ConnectionsAndClientIndex *threadData = 0;
 
     for (int i = 0; i < MAX_USER_COUNT; i++) {
-        const SOCKET newConnectionSocket = accept(listeningSocket, (SOCKADDR*)&socketAddress, &socketAddressSize);
+        const SOCKET newConnectionSocket = accept(listeningSocket, (SOCKADDR *) &socketAddress, &socketAddressSize);
         if (checkNewConnection(newConnectionSocket)) {
             free(threadData);
             free(connections);
@@ -40,10 +40,10 @@ int startServerBroadcast(const SOCKET listeningSocket, const SOCKADDR_IN socketA
         threadData->clientIndex = i;
 
 #ifdef _WIN32
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)receiveAndBroadcastMessages, (LPVOID)(threadData), 0, 0);
+        CreateThread(0, 0, (LPTHREAD_START_ROUTINE) receiveAndBroadcastMessages, (LPVOID) (threadData), 0, 0);
 #elif unix
-    pthread_t id;
-    pthread_create(&id, NULL, receiveAndBroadcastMessages, threadData);
+        pthread_t id;
+        pthread_create(&id, NULL, receiveAndBroadcastMessages, threadData);
 #endif
     }
 
@@ -61,18 +61,20 @@ int checkNewConnection(const SOCKET newConnectionSocket) {
     return EXIT_SUCCESS;
 }
 
-_Noreturn void* receiveAndBroadcastMessages(void* threadData) {
-    ConnectionsAndClientIndex* connectionsAndClientIndex = (ConnectionsAndClientIndex*)threadData;
+_Noreturn void *receiveAndBroadcastMessages(void *threadData) {
+    ConnectionsAndClientIndex *connectionsAndClientIndex = (ConnectionsAndClientIndex *) threadData;
     while (1) {
         char message[MAX_MESSAGE_LENGTH];
-        recv(connectionsAndClientIndex->connections->connectionsArray[connectionsAndClientIndex->clientIndex], message, sizeof(message), 0);
-        broadcastMessage(connectionsAndClientIndex, message, sizeof(message));
+        const int bytesReceived = recv(
+                connectionsAndClientIndex->connections->connectionsArray[connectionsAndClientIndex->clientIndex],
+                message, sizeof(message), 0);
+        broadcastMessage(connectionsAndClientIndex, message, bytesReceived);
     }
     free(connectionsAndClientIndex);
 }
 
 
-void broadcastMessage(const ConnectionsAndClientIndex* threadData, const char* message, const int messageSize) {
+void broadcastMessage(const ConnectionsAndClientIndex *threadData, const char *message, const int messageSize) {
     for (int i = 0; i < threadData->connections->connectionsCount; i++) {
         if (i == threadData->clientIndex) {
             continue;
