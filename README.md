@@ -35,16 +35,9 @@ Before you begin, ensure you have met the following requirements:
    cd ConsoleChat
    ```
 
-2. **Use executables:**
+2. **Use executables OR сompile the code:**
    ```bash
-   ./server
-   ./client
-   ```
-
-3. **OR Compile the code:**
-   ```bash
-   make client
-   make server
+   make
    ```
 
 ## Usage
@@ -89,8 +82,8 @@ Enter your username(or skip by pressing 'Enter'): without eyes
 Enter IP address: 25.XX.XX.XX  # Replace with the Hamachi IP
 Enter port: 1111
 Connected!
-[without eyes] > hello
-[anonymous] > hi, how are you?
+[without eyes] hello
+[anonymous] hi, how are you?
 ```
 
 ## License
