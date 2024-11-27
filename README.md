@@ -79,7 +79,7 @@ Before you begin, ensure you have met the following requirements:
 
 ```plaintext
 Enter your username(or skip by pressing 'Enter'): without eyes    
-Enter IP address: 25.XX.XX.XX  # Replace with the Hamachi IP
+Enter IP address: X.X.X.X  # Replace with the Hamachi IP
 Enter port: 1111
 Connected!
 [without eyes] hello
